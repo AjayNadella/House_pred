@@ -1,0 +1,12 @@
+prefix=c:/Users/ajayn/Desktop/ML/housing_price_prediction/housing_env/Library
+exec_prefix=c:/Users/ajayn/Desktop/ML/housing_price_prediction/housing_env/Library
+libdir=c:/Users/ajayn/Desktop/ML/housing_price_prediction/housing_env/Library/lib
+includedir=c:/Users/ajayn/Desktop/ML/housing_price_prediction/housing_env/Library/include
+
+Name: libzmq
+Description: 0MQ c++ library
+Version: 4.3.5
+Libs: -L${libdir} -lzmq
+Libs.private: -lstdc++ 
+Requires.private: 
+Cflags: -I${includedir} 
