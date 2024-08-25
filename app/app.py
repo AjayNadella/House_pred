@@ -1,29 +1,35 @@
-from flask import Flask, request, jsonify
+from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 import joblib
 import numpy as np
+from typing import List
 
-print("Starting the Flask application...")
+app = FastAPI()
 
-app = Flask(__name__)
-
-print("Loading the model...")
+# Load the trained model
 model = joblib.load('../models/model.pkl')
-print("Model loaded successfully.")
 
-@app.route('/')
-def home():
-    return "Welcome to the Housing Price Prediction API!"
+# Serve static files
+app.mount("/static", StaticFiles(directory="front_end"), name="static")
 
-@app.route('/predict', methods=['POST'])
-def predict():
-    print("Received a request for prediction.")
-    data = request.get_json()  # Get data posted as a JSON
-    features = data['features']
-    features_array = np.array(features).reshape(1, -1)
+class PredictRequest(BaseModel):
+    features: List[float]
+
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Housing Price Prediction API!"}
+
+@app.post("/predict")
+def predict(request: PredictRequest):
+    features = request.features
+    if len(features) != 3:
+        raise HTTPException(status_code=400, detail="Invalid number of features. Expected 3 features.")
+    
+    try:
+        features_array = np.array(features, dtype=float).reshape(1, -1)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid feature values. All values should be numeric.")
+    
     prediction = model.predict(features_array)
-    print(f"Prediction: {prediction[0]}")
-    return jsonify({'prediction': prediction[0]})
-
-if __name__ == '__main__':
-    print("Running the Flask app...")
-    app.run(debug=True)
+    return {"prediction": prediction[0]}
